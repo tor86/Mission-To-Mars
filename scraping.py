@@ -7,8 +7,8 @@ from selenium import webdriver
 
 import datetime as dt
 
-executable_path = {'executable_path': ChromeDriverManager().install()}
-browser = Browser('chrome', **executable_path, headless=False)
+#executable_path = {'executable_path': ChromeDriverManager().install()}
+#browser = Browser('chrome', **executable_path, headless=False)
 
 def scrape_all():
     executable_path = {'executable_path': ChromeDriverManager()}
@@ -22,11 +22,12 @@ def scrape_all():
         "news_paragraph": news_paragraph,
         "featured_image": featured_image(browser),
         "facts": mars_facts(),
-        "last_modified": dt.datetime.now()
+        "last_modified": dt.datetime.now(),
+        "hemispheres": mars_hemi(browser)
     }
 
     #Stop webdriver and return
-    browser.quit()
+    #browser.quit()
     return data 
 
 def mars_news(browser):
@@ -111,8 +112,30 @@ def mars_facts():
 
 
 #Convert DF to HTML format, add bootstrap
-    return df.to_html()
+    return df.to_html(justify="left", border = 2, classes="table table-striped table-responsive")
+
+
+#Mars Hemi
+def mars_hemi(browser):
+    url = 'https://marshemispheres.com/'
+    browser.visit(url)
+    # 2. Create a list to hold the images and titles
+    hemisphere_image_urls = []
+
+    #Loop through 
+    for i in range(4):
+        browser.find_by_css("a.product-item img")[i].click()
+        full_url = browser.find_by_text("Sample")["href"]
+        title = browser.find_by_css("h2.title").text
+        mars_dic = {} 
+        mars_dic["title"] = title 
+        mars_dic["img_url"] = full_url
+        hemisphere_image_urls.append(mars_dic) 
+        browser.back()
+    return hemisphere_image_urls
+
 
 if __name__ == "__main__":
+
     #If running as script, print scraped data
         print(scrape_all())
